@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Canteen - Portal Mahasiswa</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-dark: #4338ca;
+            --accent: #f43f5e;
+            --bg-color: #f8fafc;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --white: #ffffff;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
+        aside { width: 260px; background-color: var(--white); border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; justify-content: space-between; padding: 24px; }
+        .brand h1 { font-size: 20px; color: var(--primary); font-weight: 700; margin-bottom: 4px; }
+        .brand p { font-size: 12px; color: var(--text-muted); }
+        .nav-links { margin-top: 30px; display: flex; flex-direction: column; gap: 8px; flex-grow: 1; }
+        .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 10px; font-weight: 600; font-size: 14px; cursor: pointer; color: var(--text-muted); transition: all 0.2s; text-decoration: none; }
+        .nav-item:hover, .nav-item.active { background-color: #eef2ff; color: var(--primary); }
+        main { flex-grow: 1; display: flex; flex-direction: column; overflow-y: auto; }
+        header { background-color: var(--white); padding: 20px 32px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
+        .content-body { padding: 32px; max-width: 1200px; width: 100%; margin: 0 auto; }
+        .view-section { display: none; }
+        .view-section.active { display: block; }
+        .grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; margin-top: 16px; }
+        .card { background-color: var(--white); border-radius: 14px; padding: 20px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; justify-content: space-between; }
+        .card h3 { font-size: 16px; margin-bottom: 6px; }
+        .card p { color: var(--text-muted); font-size: 13px; margin-bottom: 16px; }
+        .price { font-weight: 700; color: var(--primary); font-size: 16px; margin-bottom: 16px; }
+        .btn { background-color: var(--primary); color: var(--white); border: none; padding: 10px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s; width: 100%; }
+        .btn:hover { background-color: var(--primary-dark); }
+        .btn-accent { background-color: var(--accent); }
+        /* Keranjang & Status */
+        .cart-box, .status-card, .history-card { background: var(--white); border-radius: 14px; padding: 20px; border: 1px solid #e2e8f0; margin-bottom: 16px; }
+        .status-badge { display: inline-block; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; margin-top: 8px; }
+        .badge-waiting { background: #fef3c7; color: #d97706; }
+        .badge-cooking { background: #e0e7ff; color: #4f46e5; }
+        .badge-ready { background: #dcfce7; color: #16a34a; }
+        .badge-done { background: #f1f5f9; color: #64748b; }
+    </style>
+</head>
+<body>
+
+<aside>
+    <div>
+        <div class="brand">
+            <h1>Smart Canteen</h1>
+            <p>Portal Mahasiswa (Customer)</p>
+        </div>
+        <div class="nav-links">
+            <a href="#" class="nav-item active" onclick="switchTab('menu', this)">🍔 Pilih Menu</a>
+            <a href="#" class="nav-item" onclick="switchTab('status', this)">📌 Status Pesanan Live</a>
+            <a href="#" class="nav-item" onclick="switchTab('riwayat', this)">📜 Riwayat Pesanan</a>
+        </div>
+    </div>
+    <div>
+        <a href="tenant.html" target="_blank" class="nav-item" style="color: var(--accent); border: 1px dashed var(--accent);">👉 Buka Portal Penjual</a>
+    </div>
+</aside>
+
+<main>
+    <header>
+        <h2>Kantin UMM - Pesan Cepat Tanpa Antre</h2>
+        <div style="font-weight: 600; font-size: 14px;">Halo, M. Rasyiduta</div>
+    </header>
+
+    <div class="content-body">
+
+        <!-- TAB 1: PILIH MENU & KERANJANG -->
+        <div id="tab-menu" class="view-section active">
+            <div style="display: flex; gap: 24px;">
+                <div style="flex: 2;">
+                    <h3>Daftar Menu Makanan & Minuman</h3>
+                    <div class="grid-container">
+                        <div class="card">
+                            <div>
+                                <h3>Nasi Ayam Geprek</h3>
+                                <p>Sambal terasi/bawang khas UMM.</p>
+                                <div class="price">Rp 12.000</div>
+                            </div>
+                            <button class="btn" onclick="tambahKeKeranjang('Nasi Ayam Geprek', 12000)">+ Tambah</button>
+                        </div>
+                        <div class="card">
+                            <div>
+                                <h3>Mie Ayam Spesial</h3>
+                                <p>Topping bakso dan pangsit gurih.</p>
+                                <div class="price">Rp 10.000</div>
+                            </div>
+                            <button class="btn" onclick="tambahKeKeranjang('Mie Ayam Spesial', 10000)">+ Tambah</button>
+                        </div>
+                        <div class="card">
+                            <div>
+                                <h3>Es Teh Manis</h3>
+                                <p>Teh melati segar beres.</p>
+                                <div class="price">Rp 4.000</div>
+                            </div>
+                            <button class="btn" onclick="tambahKeKeranjang('Es Teh Manis', 4000)">+ Tambah</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Keranjang Belanja (Bisa Lebih Dari 1 Item) -->
+                <div style="flex: 1;">
+                    <div class="cart-box">
+                        <h3>🛒 Keranjang Anda</h3>
+                        <ul id="cart-list" style="list-style: none; margin: 16px 0; font-size: 14px; max-height: 200px; overflow-y: auto;">
+                            <li style="color: var(--text-muted); text-align: center;">Keranjang kosong</li>
+                        </ul>
+                        <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 12px 0;">
+                        <div style="display: flex; justify-content: space-between; font-weight: 700; margin-bottom: 16px;">
+                            <span>Total:</span>
+                            <span id="cart-total">Rp 0</span>
+                        </div>
+                        <button class="btn btn-accent" onclick="checkoutPesanan()">Checkout & Pesan</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: STATUS PESANAN LIVE -->
+        <div id="tab-status" class="view-section">
+            <h3>Lacak Status Pesanan Secara Real-Time</h3>
+            <div id="live-status-container" style="margin-top: 16px;">
+                <div class="status-card">
+                    <p style="color: var(--text-muted);">Belum ada pesanan aktif saat ini. Silakan buat pesanan di menu.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: RIWAYAT PESANAN -->
+        <div id="tab-riwayat" class="view-section">
+            <h3>Riwayat Pesanan Sebelumnya</h3>
+            <div id="history-container" style="margin-top: 16px;">
+                <div class="history-card">
+                    <h4>#A-010 - Nasi Ayam Geprek (1x)</h4>
+                    <p style="color: var(--text-muted); font-size: 13px; margin: 4px 0;">Tanggal: Kemarin, 12:30 WIB</p>
+                    <span class="status-badge badge-done">Selesai & Diambil</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<script>
+    let keranjang = [];
+    let pesananAktif = null;
+
+    function switchTab(tabName, element) {
+        document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+
+        if(tabName === 'menu') document.getElementById('tab-menu').classList.add('active');
+        if(tabName === 'status') document.getElementById('tab-status').classList.add('active');
+        if(tabName === 'riwayat') document.getElementById('tab-riwayat').classList.add('active');
+        element.classList.add('active');
+    }
+
+    function tambahKeKeranjang(nama, harga) {
+        let item = keranjang.find(i => i.nama === nama);
+        if (item) {
+            item.qty += 1;
+        } else {
+            keranjang.push({ nama, harga, qty: 1 });
+        }
+        updateKeranjangUI();
+    }
+
+    function updateKeranjangUI() {
+        let listEl = document.getElementById('cart-list');
+        let totalEl = document.getElementById('cart-total');
+        listEl.innerHTML = '';
+        let total = 0;
+
+        if (keranjang.length === 0) {
+            listEl.innerHTML = '<li style="color: var(--text-muted); text-align: center;">Keranjang kosong</li>';
+            totalEl.innerText = 'Rp 0';
+            return;
+        }
+
+        keranjang.forEach((item, index) => {
+            total += item.harga * item.qty;
+            listEl.innerHTML += `<li style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span>${item.nama} (x${item.qty})</span>
+                    <span>Rp ${item.harga * item.qty}</span>
+                </li>`;
+        });
+        totalEl.innerText = `Rp ${total}`;
+    }
+
+    function checkoutPesanan() {
+        if (keranjang.length === 0) {
+            alert('Keranjang masih kosong!');
+            return;
+        }
+
+        let orderId = 'A-' + Math.floor(100 + Math.random() * 900);
+        pesananAktif = {
+            id: orderId,
+            items: [...keranjang],
+            status: 'Menunggu Konfirmasi Dapur',
+            badgeClass: 'badge-waiting'
+        };
+
+        // Simpan ke localStorage supaya bisa dibaca oleh halaman Penjual
+        localStorage.setItem('smartCanteenOrder', JSON.stringify(pesananAktif));
+
+        keranjang = [];
+        updateKeranjangUI();
+        alert(`Pesanan #${orderId} berhasil dikirim ke kantin!`);
+        switchTab('status', document.querySelectorAll('.nav-item')[1]);
+        renderLiveStatus();
+    }
+
+    function renderLiveStatus() {
+        let container = document.getElementById('live-status-container');
+        // Cek status terbaru dari localStorage (bisa diubah oleh halaman tenant)
+        let savedOrder = JSON.parse(localStorage.getItem('smartCanteenOrder'));
+
+        if (!savedOrder) {
+            container.innerHTML = `<div class="status-card"><p style="color: var(--text-muted);">Belum ada pesanan aktif.</p></div>`;
+            return;
+        }
+
+        let rincian = savedOrder.items.map(i => `${i.nama} (x${i.qty})`).join(', ');
+
+        container.innerHTML = `
+                <div class="status-card" style="border-left: 4px solid var(--primary);">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h4 style="font-size: 18px;">Nomor Antrean: #${savedOrder.id}</h4>
+                        <span class="status-badge ${savedOrder.badgeClass}">${savedOrder.status}</span>
+                    </div>
+                    <p style="margin-top: 8px; color: var(--text-muted);">Menu: <b>${rincian}</b></p>
+                    <p style="margin-top: 4px; font-size: 13px; color: #6366f1;">🔔 Sistem IoT ESP32 & Buzzer memantau antrean Anda secara real-time.</p>
+                </div>
+            `;
+    }
+
+    // Auto-refresh status tiap 2 detik untuk mensimulasikan IoT real-time
+    setInterval(renderLiveStatus, 2000);
+</script>
+</body>
+</html>

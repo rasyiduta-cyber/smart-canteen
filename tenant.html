@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Canteen - Dashboard Tenant / Penjual</title>
+    <style>
+        :root {
+            --primary: #0f172a;
+            --accent: #f43f5e;
+            --bg-color: #f8fafc;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --white: #ffffff;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); padding: 32px; max-width: 900px; margin: 0 auto; }
+        h2 { color: var(--primary); margin-bottom: 6px; }
+        .subtitle { color: var(--text-muted); font-size: 13px; margin-bottom: 24px; }
+        .order-box { background: var(--white); border-radius: 14px; padding: 24px; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .btn-group { display: flex; gap: 10px; margin-top: 16px; }
+        .btn { background-color: #4f46e5; color: white; border: none; padding: 10px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; flex: 1; }
+        .btn:hover { background-color: #4338ca; }
+        .btn-accent { background-color: var(--accent); }
+        .btn-accent:hover { background-color: #e11d48; }
+        .esp-box { background: #1e293b; color: #38bdf8; padding: 16px; border-radius: 10px; font-family: monospace; font-size: 13px; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+<h2>Dashboard Kelola Tenant Kantin (Penjual)</h2>
+<p class="subtitle">Sistem Penerimaan Pesanan Otomatis & Kontrol Hardware ESP32</p>
+
+<div id="tenant-order-container">
+    <div class="order-box">
+        <h3 style="color: var(--text-muted);">Tidak ada antrean baru saat ini.</h3>
+        <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Menunggu mahasiswa melakukan pemesanan dari Portal Mahasiswa...</p>
+    </div>
+</div>
+
+<div class="esp-box">
+    <strong>[STATUS HARDWARE ESP32 & BUZZER DI LOKET]:</strong><br>
+    <span id="esp-log">● Menunggu aksi dari penjual...</span>
+</div>
+
+<script>
+    function loadTenantOrder() {
+        let container = document.getElementById('tenant-order-container');
+        let savedOrder = JSON.parse(localStorage.getItem('smartCanteenOrder'));
+
+        if (!savedOrder) {
+            container.innerHTML = `
+                    <div class="order-box">
+                        <h3 style="color: var(--text-muted);">Tidak ada antrean baru saat ini.</h3>
+                        <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Menunggu mahasiswa melakukan pemesanan dari Portal Mahasiswa...</p>
+                    </div>
+                `;
+            return;
+        }
+
+        let rincianHTML = savedOrder.items.map(i => `<li>${i.nama} (x${i.qty})</li>`).join('');
+
+        container.innerHTML = `
+                <div class="order-box" style="border-left: 5px solid var(--accent);">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h3>Pesanan Masuk: #${savedOrder.id}</h3>
+                        <span style="font-size: 13px; font-weight: 700; color: #d97706;">Status Saat Ini: ${savedOrder.status}</span>
+                    </div>
+                    <ul style="margin: 12px 0 16px 20px; font-size: 15px;">
+                        ${rincianHTML}
+                    </ul>
+                    <div class="btn-group">
+                        <button class="btn" onclick="ubahStatus('Sedang Dimasak', 'badge-cooking')">1. Proses Masak</button>
+                        <button class="btn" style="background-color: #16a34a;" onclick="ubahStatus('Siap Diambil di Loket', 'badge-ready')">2. Makanan Siap</button>
+                        <button class="btn btn-accent" onclick="selesaiPesanan()">3. Selesai (Bunyikan Buzzer)</button>
+                    </div>
+                </div>
+            `;
+    }
+
+    function ubahStatus(statusText, badgeClass) {
+        let savedOrder = JSON.parse(localStorage.getItem('smartCanteenOrder'));
+        if (savedOrder) {
+            savedOrder.status = statusText;
+            savedOrder.badgeClass = badgeClass;
+            localStorage.setItem('smartCanteenOrder', JSON.stringify(savedOrder));
+            loadTenantOrder();
+            document.getElementById('esp-log').innerText = `● ESP32: Status diperbarui ke "${statusText}" pada LCD loket.`;
+        }
+    }
+
+    function selesaiPesanan() {
+        let savedOrder = JSON.parse(localStorage.getItem('smartCanteenOrder'));
+        if (savedOrder) {
+            document.getElementById('esp-log').innerHTML = `🔔 <b style="color: #4ade80;">BUZZER ESP32 BERBUNYI!</b> Nomor #${savedOrder.id} dipanggil otomatis.`;
+            alert('Buzzer ESP32 di loket berbunyi keras & nomor antrean terpampang di LCD!');
+
+            // Ubah status ke Selesai
+            savedOrder.status = 'Selesai & Diambil';
+            savedOrder.badgeClass = 'badge-done';
+            localStorage.setItem('smartCanteenOrder', JSON.stringify(savedOrder));
+            loadTenantOrder();
+        }
+    }
+
+    // Refresh tiap 2 detik
+    setInterval(loadTenantOrder, 2000);
+    loadTenantOrder();
+</script>
+</body>
+</html>
